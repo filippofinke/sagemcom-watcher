@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/filippofinke/sagemcom-watcher/compare/v0.1.1...v0.1.2) (2026-06-11)
+
+
+### Documentation
+
+* add Docker Hub image information and run instructions to README ([20dd140](https://github.com/filippofinke/sagemcom-watcher/commit/20dd140f185c8c535308950b38e60dab94757aa9))
+
 ## [0.1.1](https://github.com/filippofinke/sagemcom-watcher/compare/v0.1.0...v0.1.1) (2026-06-11)
 
 
