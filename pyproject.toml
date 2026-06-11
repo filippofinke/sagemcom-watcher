@@ -1,0 +1,48 @@
+[project]
+name = "sagemcom-watcher"
+version = "0.1.0"
+description = "A modular monitoring utility and web dashboard for Sagemcom home routers, supporting Salt Fiber Box X6 and others."
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [
+    { name = "Filippo Finke", email = "filippofinke@protonmail.ch" }
+]
+license = { text = "MIT" }
+keywords = ["sagemcom", "router", "monitoring", "telemetry", "salt", "fiberbox"]
+dependencies = [
+    "sagemcom-api>=1.4.3",
+    "python-dotenv>=1.0.1",
+    "aiohttp>=3.9.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "ruff>=0.6.0",
+]
+
+[project.urls]
+Repository = "https://github.com/filippofinke/sagemcom-watcher"
+Issues = "https://github.com/filippofinke/sagemcom-watcher/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project.scripts]
+sagemcom-watcher = "sagemcom_watcher.main:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sagemcom_watcher"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]

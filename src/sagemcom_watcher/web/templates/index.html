@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sagemcom Watcher</title>
+    <meta name="description" content="Minimal Sagemcom router monitoring interface.">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel=stylesheet href="/static/css/style.css">
+</head>
+<body>
+
+    <div class="main-container">
+        <!-- Controls Header -->
+        <div class="controls-container">
+            <div class="search-wrapper">
+                <input type="text" id="search-bar" class="search-input" placeholder="Filter charts by key...">
+            </div>
+            <div class="filter-tags" id="filter-tags">
+                <span class="filter-tag active" data-category="all">All</span>
+                <span class="filter-tag" data-category="system">System</span>
+                <span class="filter-tag" data-category="processors">Processors</span>
+                <span class="filter-tag" data-category="network">Network</span>
+                <span class="filter-tag" data-category="memory">Memory</span>
+                <span class="filter-tag" data-category="sensors">Sensors</span>
+                <span class="filter-tag" data-category="logging">Logging</span>
+            </div>
+            <!-- Time Range Filter -->
+            <select id="time-range-select" class="time-range-select" title="Time range">
+                <option value="">All Time</option>
+                <option value="1">Last 1 hour</option>
+                <option value="6">Last 6 hours</option>
+                <option value="24" selected>Last 24 hours</option>
+                <option value="72">Last 3 days</option>
+                <option value="168">Last 7 days</option>
+                <option value="custom">Custom Hours…</option>
+                <option value="range">Custom Range…</option>
+            </select>
+            <div class="time-range-custom-wrap" id="custom-hours-wrap" style="display:none;">
+                <input type="number" id="custom-hours" min="1" max="9999" placeholder="hrs">
+                <label for="custom-hours">h</label>
+            </div>
+            <div class="time-range-range-wrap" id="custom-range-wrap" style="display:none;">
+                <label for="range-start">Start:</label>
+                <input type="datetime-local" id="range-start" step="1">
+                <label for="range-end">End:</label>
+                <input type="datetime-local" id="range-end" step="1">
+            </div>
+            <label class="toggle-container">
+                <input type="checkbox" id="toggle-constants" checked>
+                <span>Show Static Fields</span>
+            </label>
+            <!-- Export Button -->
+            <button class="export-btn" id="export-btn" title="Export filtered data">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 12L3 7h3V1h4v6h3L8 12z"/>
+                    <rect x="2" y="13" width="12" height="2"/>
+                </svg>
+                Export
+            </button>
+        </div>
+
+        <!-- Main Workspace -->
+        <main class="content-area">
+            <!-- Starred Comparison Dashboard -->
+            <section id="starred-section" class="starred-section" style="display: none;">
+                <div class="starred-header">
+                    <div class="starred-title-wrap">
+                        <span class="starred-title">Comparison Dashboard</span>
+                        <span class="starred-count-badge" id="starred-count-badge">0</span>
+                    </div>
+                    <div class="starred-controls">
+                        <!-- View Toggle -->
+                        <div class="view-toggle-group">
+                            <button class="view-toggle-btn active" id="view-combined-btn">Combined</button>
+                            <button class="view-toggle-btn" id="view-split-btn">Split</button>
+                            <button class="view-toggle-btn" id="view-both-btn">Both</button>
+                        </div>
+                        <!-- Normalize Y-Axes Toggle -->
+                        <label class="toggle-container" style="margin-left: 0.5rem;">
+                            <input type="checkbox" id="toggle-normalize" checked>
+                            <span>Normalize Y-Axis</span>
+                        </label>
+                        <!-- Collapse Dashboard Button -->
+                        <button class="collapse-dashboard-btn" id="collapse-dashboard-btn" title="Collapse/Expand Dashboard">
+                            <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="starred-body" id="starred-body">
+                    <!-- Starred Combined Chart Container -->
+                    <div class="comparison-chart-card" id="comparison-chart-card">
+                        <div class="comparison-chart-container">
+                            <canvas id="comparison-canvas"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Starred Side-by-Side Grid -->
+                    <div class="starred-grid" id="starred-grid"></div>
+                </div>
+            </section>
+
+            <!-- Charts Grid -->
+            <section class="charts-grid" id="charts-grid">
+                <!-- Dynamically populated cards -->
+            </section>
+        </main>
+    </div>
+
+    <!-- Sticky Footer -->
+    <footer>
+        <div class="footer-left">
+            <div class="status-indicator"></div>
+            <span>Sagemcom Watcher</span>
+        </div>
+        <div class="footer-right">
+            <span class="footer-stat-clickable" id="footer-btn-logs" title="Inspect latest variables">Logs: <strong id="stat-total-records">0</strong></span>
+            <span>Uptime: <strong id="stat-router-uptime">N/A</strong></span>
+            <span class="footer-stat-clickable" id="footer-btn-poll" title="Inspect latest variables">Last Poll: <strong id="stat-last-poll">N/A</strong> (<span id="stat-time-elapsed">0s ago</span>)</span>
+            <span>Refreshed: <strong id="stat-refresh-elapsed">0s ago</strong></span>
+        </div>
+    </footer>
+
+    <!-- Modal for Detailed Inspect -->
+    <div class="modal" id="inspect-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title" id="modal-timestamp">Log Details</div>
+                <button class="close-btn" id="close-modal">Close</button>
+            </div>
+            <div class="modal-content">
+                <input type="text" id="json-search" class="json-search-input" placeholder="Search variables...">
+                <div class="json-viewer" id="json-viewer">
+                    <!-- Dynamic variables -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Full Screen Chart -->
+    <div class="modal" id="chart-modal">
+        <div class="modal-card" style="max-width: 90%; width: 90%; height: 85vh;">
+            <div class="modal-header">
+                <div style="display: flex; align-items: center; gap: 0.5rem; flex: 1; min-width: 0;">
+                    <button class="row-star-btn" id="chart-modal-star-btn" title="Star metric"></button>
+                    <div class="modal-title" id="chart-modal-title" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Metric History</div>
+                </div>
+                <button class="close-btn" id="close-chart-modal">Close</button>
+            </div>
+            <div class="modal-content" style="display: flex; flex-direction: column; height: calc(100% - 40px); background: var(--bg-color);">
+                <div id="chart-modal-container" style="flex: 1; min-height: 0; position: relative;">
+                    <canvas id="chart-modal-canvas"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Export Data -->
+    <div class="modal" id="export-modal">
+        <div class="modal-card" style="display: flex; flex-direction: column;">
+            <div class="modal-header">
+                <div class="modal-title">Export Filtered Data</div>
+                <button class="close-btn" id="close-export-modal">Close</button>
+            </div>
+            <div class="export-meta" id="export-meta-text">Showing 0 rows / 0 metrics</div>
+            <textarea class="export-textarea" id="export-text" readonly></textarea>
+            <div class="export-actions">
+                <button class="export-action-btn primary" id="export-btn-copy">Copy to Clipboard</button>
+                <button class="export-action-btn" id="export-btn-download">Download .csv</button>
+                <span id="export-copy-feedback">Copied!</span>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/static/js/app.js"></script>
+</body>
+</html>

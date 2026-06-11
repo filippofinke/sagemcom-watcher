@@ -1,0 +1,17 @@
+services:
+  watcher:
+    build: .
+    container_name: sagemcom-watcher
+    ports:
+      - "${WEB_PORT:-3456}:${WEB_PORT:-3456}"
+    environment:
+      - ROUTER_HOST=${ROUTER_HOST}
+      - ROUTER_USERNAME=${ROUTER_USERNAME}
+      - ROUTER_PASSWORD=${ROUTER_PASSWORD}
+      - ROUTER_ENCRYPTION=${ROUTER_ENCRYPTION}
+      - WEB_PORT=${WEB_PORT}
+      - HISTORY_FILE=/app/data/history.json
+      - POLL_INTERVAL_SECONDS=${POLL_INTERVAL_SECONDS}
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
