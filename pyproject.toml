@@ -1,6 +1,6 @@
 [project]
 name = "sagemcom-watcher"
-version = "0.1.1"
+version = "0.1.2"
 description = "A modular monitoring utility and web dashboard for Sagemcom home routers, supporting Salt Fiber Box X6 and others."
 readme = "README.md"
 requires-python = ">=3.12"
