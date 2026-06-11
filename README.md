@@ -80,6 +80,21 @@ Open the dashboard at [http://localhost:3456](http://localhost:3456).
 
 ## Running with Docker
 
+A prebuilt image is published on Docker Hub: [`filippofinke/sagemcom-watcher`](https://hub.docker.com/r/filippofinke/sagemcom-watcher).
+
+Pull and run it directly:
+
+```bash
+docker run -d \
+  --name sagemcom-watcher \
+  --env-file .env \
+  -p 3456:3456 \
+  -v "$(pwd)/data:/app/data" \
+  filippofinke/sagemcom-watcher:latest
+```
+
+Or build and run from source with Docker Compose:
+
 ```bash
 docker compose up -d --build
 ```
